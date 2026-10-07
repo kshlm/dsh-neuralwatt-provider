@@ -57,3 +57,7 @@ service.
 - Context and max-output capacities come from the endpoint; when it omits them the
   defaults are `262144` context and `32768` output tokens.
 - Every request carries `attributionHeaders()` and forwards the caller's abort signal.
+
+## License
+
+[MIT](LICENSE)

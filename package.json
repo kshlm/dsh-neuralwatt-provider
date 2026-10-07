@@ -2,20 +2,45 @@
   "name": "dsh-llm-neuralwatt",
   "version": "0.1.0",
   "description": "Neuralwatt LLM provider plugin for DeepSeek Harness — dynamic model discovery with capability mapping over an OpenAI-compatible API",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "neuralwatt"
+  ],
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "exports": {
-    ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" },
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
     "./package.json": "./package.json"
   },
-  "files": ["lib", "cordis.patch.yml", "README.md"],
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
   },
   "license": "MIT",
+  "author": "Kaushal M <kaushal.m@proton.me>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kshlm/dsh-neuralwatt-provider.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kshlm/dsh-neuralwatt-provider/issues"
+  },
+  "homepage": "https://github.com/kshlm/dsh-neuralwatt-provider#readme",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
