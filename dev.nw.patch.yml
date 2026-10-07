@@ -1,0 +1,18 @@
+# Boot the *local working copy* of dsh-llm-neuralwatt into any dsh profile,
+# without installing anything into the profile:
+#
+#   pnpm build
+#   dsh --profile dsh-tui --patch ./dev.nw.patch.yml --dump-config   # inspect
+#   dsh --profile dsh-tui --patch ./dev.nw.patch.yml                 # boot
+#
+# `name` is relative to this file, so the loader resolves ./lib/index.js to
+# this repo's build and imports it directly (see dsh-app-boot's
+# anchorInsertedPluginNames). `route: nw` avoids colliding with the
+# `neuralwatt` provider already wired under llm-pi-ai in the dsh-tui profile.
+- insert:
+    - id: llm-neuralwatt
+      name: ./lib/index.js
+      config:
+        route: nw
+        baseURL: https://pipe.kshlm.xyz/neuralwatt
+        apiKeyEnv: NEURALWATT_API_KEY

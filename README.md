@@ -11,6 +11,16 @@ OpenAI-compatible `/chat/completions` API.
 
     dsh plugin --profile <profile> add dsh-llm-neuralwatt
 
+The package declares a `dsh.bundle` layer (`cordis.patch.yml`) that inserts the
+`llm-neuralwatt` plugin into the profile automatically — no manual patch row is
+needed. To pass configuration, restate the row with a `config` block in your
+profile's `cordis.patch.yml`:
+
+    - id: llm-neuralwatt
+      name: dsh-llm-neuralwatt
+      config:
+        baseURL: https://api.neuralwatt.com/v1
+
 Then remove any hand-written `neuralwatt` block under `llm-pi-ai.providers` in your
 profile's `cordis.patch.yml` (the two routes would otherwise collide).
 

@@ -1,0 +1,11 @@
+# Bundle layer installed by `dsh plugin add`: inserts the Neuralwatt LLM
+# provider into the profile composition. The row references this package by
+# name so Node resolution loads the installed `lib/index.js`.
+#
+# All configuration is optional — the plugin falls back to env vars and
+# built-in defaults (route `neuralwatt`, baseURL `https://api.neuralwatt.com/v1`,
+# apiKeyEnv `NEURALWATT_API_KEY`). Override in your profile's `cordis.patch.yml`
+# by restating this row with a full `config` block.
+- insert:
+    - id: llm-neuralwatt
+      name: dsh-llm-neuralwatt
