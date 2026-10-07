@@ -1,6 +1,8 @@
 import type { GenerateOptions, ToolSchema } from '@deepseek-ai/dsh-llm'
 import { fileHandleText, offloadedImageText, textOnlyImageText } from '@deepseek-ai/dsh-llm'
+import type { ContentBlock, FinishReason, StreamChunk, TokenUsage, ToolCallId } from '@deepseek-ai/dsh-llm'
 import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+import { brandString } from '@deepseek-ai/dsh-brand'
 
 export interface BuildHooks {
   /** Resolve an image attachment to a data URL, or undefined when unavailable. */
@@ -148,4 +150,124 @@ export async function buildChatRequestBody(
   if (options.stop !== undefined && options.stop.length > 0) body.stop = options.stop
   if (options.reasoningEffort !== undefined) body.reasoning_effort = String(options.reasoningEffort)
   return body
+}
+
+export interface SseParser {
+  push(text: string): StreamChunk[]
+  end(): StreamChunk[]
+}
+
+interface ToolAcc { index: number; id: string; name: string; args: string }
+
+/** Incremental OpenAI SSE → harness StreamChunk translator. */
+export function createSseParser(): SseParser {
+  let buf = ''
+  let nextIndex = 0
+  let textBlock: { index: number; text: string } | null = null
+  let reasonBlock: { index: number; text: string } | null = null
+  const toolBlocks = new Map<number, ToolAcc>()
+  let finishReason: FinishReason = { kind: 'stop' }
+  let usage: TokenUsage | null = null
+
+  function finishFrom(raw: string | undefined): FinishReason {
+    if (raw === 'tool_calls') return { kind: 'tool-calls' }
+    if (raw === 'length') return { kind: 'max-tokens' }
+    return { kind: 'stop' }
+  }
+
+  function handleData(payload: string, out: StreamChunk[]): void {
+    if (payload === '[DONE]') return
+    let evt: any
+    try {
+      evt = JSON.parse(payload)
+    } catch {
+      throw new Error(`unparseable SSE payload: ${payload.slice(0, 80)}`)
+    }
+    const choice = evt?.choices?.[0]
+    const delta = choice?.delta
+    if (typeof delta?.content === 'string' && delta.content.length > 0) {
+      if (textBlock === null) {
+        textBlock = { index: nextIndex++, text: '' }
+        out.push({ type: 'block-start', index: textBlock.index, blockType: 'text' })
+      }
+      textBlock.text += delta.content
+      out.push({ type: 'text-delta', index: textBlock.index, text: delta.content })
+    }
+    const reasoning = delta?.reasoning_content ?? delta?.reasoning
+    if (typeof reasoning === 'string' && reasoning.length > 0) {
+      if (reasonBlock === null) {
+        reasonBlock = { index: nextIndex++, text: '' }
+        out.push({ type: 'block-start', index: reasonBlock.index, blockType: 'reasoning' })
+      }
+      reasonBlock.text += reasoning
+      out.push({ type: 'reasoning-delta', index: reasonBlock.index, text: reasoning })
+    }
+    if (Array.isArray(delta?.tool_calls)) {
+      for (const tc of delta.tool_calls) {
+        const sseIndex = typeof tc.index === 'number' ? tc.index : 0
+        let acc = toolBlocks.get(sseIndex)
+        if (acc === undefined) {
+          acc = { index: nextIndex++, id: '', name: '', args: '' }
+          toolBlocks.set(sseIndex, acc)
+          out.push({ type: 'block-start', index: acc.index, blockType: 'tool-call' })
+        }
+        if (typeof tc.id === 'string') acc.id += tc.id
+        const fn = tc.function ?? {}
+        if (typeof fn.name === 'string') acc.name += fn.name
+        const argDelta = typeof fn.arguments === 'string' ? fn.arguments : ''
+        acc.args += argDelta
+        out.push({
+          type: 'tool-call-delta',
+          index: acc.index,
+          id: brandString<ToolCallId>(acc.id),
+          ...(acc.name.length > 0 ? { name: acc.name } : {}),
+          argumentsDelta: argDelta,
+        })
+      }
+    }
+    if (choice?.finish_reason !== undefined && choice.finish_reason !== null) {
+      finishReason = finishFrom(choice.finish_reason)
+    }
+    if (evt?.usage !== undefined && evt.usage !== null) {
+      const u = evt.usage
+      const tokenUsage: TokenUsage = {
+        inputTokens: u.prompt_tokens ?? 0,
+        outputTokens: u.completion_tokens ?? 0,
+      }
+      if (u.total_tokens !== undefined) tokenUsage.totalTokens = u.total_tokens
+      const cached = u.prompt_tokens_details?.cached_tokens
+      if (cached !== undefined) tokenUsage.cacheReadTokens = cached
+      const reasoningTokens = u.completion_tokens_details?.reasoning_tokens
+      if (reasoningTokens !== undefined) tokenUsage.reasoningTokens = reasoningTokens
+      usage = tokenUsage
+    }
+  }
+
+  return {
+    push(text: string): StreamChunk[] {
+      buf += text
+      const out: StreamChunk[] = []
+      let nl: number
+      while ((nl = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, nl).replace(/\r$/, '')
+        buf = buf.slice(nl + 1)
+        if (line.startsWith('data:')) handleData(line.slice(5).trim(), out)
+      }
+      return out
+    },
+    end(): StreamChunk[] {
+      const out: StreamChunk[] = []
+      const blocks: { index: number; block: ContentBlock }[] = []
+      if (reasonBlock !== null) blocks.push({ index: reasonBlock.index, block: { type: 'reasoning', text: reasonBlock.text } })
+      if (textBlock !== null) blocks.push({ index: textBlock.index, block: { type: 'text', text: textBlock.text } })
+      for (const acc of toolBlocks.values()) {
+        blocks.push({ index: acc.index, block: { type: 'tool-call', id: brandString<ToolCallId>(acc.id), name: acc.name, arguments: acc.args } })
+      }
+      blocks.sort((a, b) => a.index - b.index)
+      for (const b of blocks) out.push({ type: 'block-end', index: b.index, block: b.block })
+      if (usage !== null) out.push({ type: 'usage', usage })
+      out.push({ type: 'finish', reason: finishReason })
+      return out
+    },
+  }
 }
