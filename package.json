@@ -15,7 +15,9 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "smoke": "node scripts/local-smoke.mjs",
+    "verify": "pnpm test && pnpm typecheck && pnpm build && pnpm smoke"
   },
   "dependencies": {
     "@deepseek-ai/dsh-brand": "^0.2.0-rc.2",
