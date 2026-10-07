@@ -10,11 +10,11 @@ import {
   type StreamChunk,
 } from '@deepseek-ai/dsh-llm'
 import type { ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
-import type { ModelDescriptor } from './models.ts'
-import { discoverModels } from './models.ts'
-import { buildChatRequestBody, createSseParser } from './openai.ts'
-import type { ResolveApiKey } from './credentials.ts'
-import { httpError, missingCredential, protocolError, unknownModel } from './errors.ts'
+import type { ModelDescriptor } from './models.js'
+import { discoverModels } from './models.js'
+import { buildChatRequestBody, createSseParser } from './openai.js'
+import type { ResolveApiKey } from './credentials.js'
+import { httpError, missingCredential, protocolError, unknownModel } from './errors.js'
 
 export interface NeuralwattAdapterOptions {
   route: string
