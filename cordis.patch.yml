@@ -8,4 +8,4 @@
 # by restating this row with a full `config` block.
 - insert:
     - id: llm-neuralwatt
-      name: dsh-llm-neuralwatt
+      name: "@kshlm/dsh-neuralwatt-provider"

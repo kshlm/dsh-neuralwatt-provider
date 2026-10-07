@@ -18,6 +18,6 @@ export function makeResolveApiKey(opts: ResolveApiKeyOptions): ResolveApiKey {
     const fromStore = opts.resolveCredential ? await opts.resolveCredential(opts.apiKeyEnv) : undefined
     const raw = fromStore !== undefined && fromStore.length > 0 ? fromStore : env[opts.apiKeyEnv]
     if (raw === undefined || raw.trim().length === 0) return undefined
-    return assertUsableApiKey(raw, 'dsh-llm-neuralwatt', opts.apiKeyEnv)
+    return assertUsableApiKey(raw, '@kshlm/dsh-neuralwatt-provider', opts.apiKeyEnv)
   }
 }

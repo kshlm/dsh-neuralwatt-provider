@@ -1,5 +1,5 @@
 {
-  "name": "dsh-llm-neuralwatt",
+  "name": "@kshlm/dsh-neuralwatt-provider",
   "version": "0.1.0",
   "description": "Neuralwatt LLM provider plugin for DeepSeek Harness — dynamic model discovery with capability mapping over an OpenAI-compatible API",
   "keywords": [
@@ -40,6 +40,9 @@
   "homepage": "https://github.com/kshlm/dsh-neuralwatt-provider#readme",
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

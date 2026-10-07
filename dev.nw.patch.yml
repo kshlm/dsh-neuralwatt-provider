@@ -1,4 +1,4 @@
-# Boot the *local working copy* of dsh-llm-neuralwatt into any dsh profile,
+# Boot the *local working copy* of @kshlm/dsh-neuralwatt-provider into any dsh profile,
 # without installing anything into the profile:
 #
 #   pnpm build

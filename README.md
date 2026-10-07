@@ -1,4 +1,4 @@
-# dsh-llm-neuralwatt
+# @kshlm/dsh-neuralwatt-provider
 
 Neuralwatt LLM provider plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
@@ -9,7 +9,7 @@ OpenAI-compatible `/chat/completions` API.
 
 ## Install
 
-    dsh plugin --profile <profile> add dsh-llm-neuralwatt
+    dsh plugin --profile <profile> add @kshlm/dsh-neuralwatt-provider
 
 The package declares a `dsh.bundle` layer (`cordis.patch.yml`) that inserts the
 `llm-neuralwatt` plugin into the profile automatically, so no manual patch row is
@@ -17,7 +17,7 @@ needed. To pass configuration, restate the row with a `config` block in your
 profile's `cordis.patch.yml`:
 
     - id: llm-neuralwatt
-      name: dsh-llm-neuralwatt
+      name: "@kshlm/dsh-neuralwatt-provider"
       config:
         baseURL: https://api.neuralwatt.com/v1
 
@@ -29,7 +29,7 @@ profile's `cordis.patch.yml` (the two routes would otherwise collide).
 Configure under the plugin (`llm-neuralwatt`) in `cordis.patch.yml`:
 
     - id: llm-neuralwatt
-      name: dsh-llm-neuralwatt
+      name: "@kshlm/dsh-neuralwatt-provider"
       config:
         baseURL: https://api.neuralwatt.com/v1   # optional; override here
         apiKeyEnv: NEURALWATT_API_KEY            # optional; env var *name*

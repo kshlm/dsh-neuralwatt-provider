@@ -34,6 +34,6 @@ describe('dsh.bundle manifest', () => {
     expect(patch).toMatch(/\bid:\s*llm-neuralwatt\b/)
     // Rows must reference the installed package by name, not a source path,
     // so Node resolution finds the installed code.
-    expect(patch).toMatch(/\bname:\s*dsh-llm-neuralwatt\s*$/m)
+    expect(patch).toMatch(/\bname:\s*"?@kshlm\/dsh-neuralwatt-provider"?\s*$/m)
   })
 })

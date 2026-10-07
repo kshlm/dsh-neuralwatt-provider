@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Local end-to-end smoke test for dsh-llm-neuralwatt.
+ * Local end-to-end smoke test for @kshlm/dsh-neuralwatt-provider.
  *
  * Unlike the vitest suite (which injects a fake fetch), this boots the built
  * plugin against a real local HTTP server that speaks Neuralwatt's wire API:
