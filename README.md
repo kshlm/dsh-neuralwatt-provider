@@ -3,8 +3,8 @@
 Neuralwatt LLM provider plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
 
 It dynamically populates models from Neuralwatt's `GET /v1/models` endpoint and sets
-each model's capabilities — input modalities (text / image), context window, max output
-tokens, and reasoning efforts — from the endpoint metadata. It speaks Neuralwatt's
+each model's capabilities from the endpoint metadata: input modalities (text or image),
+context window, max output tokens, and reasoning efforts. It speaks Neuralwatt's
 OpenAI-compatible `/chat/completions` API.
 
 ## Install
@@ -12,7 +12,7 @@ OpenAI-compatible `/chat/completions` API.
     dsh plugin --profile <profile> add dsh-llm-neuralwatt
 
 The package declares a `dsh.bundle` layer (`cordis.patch.yml`) that inserts the
-`llm-neuralwatt` plugin into the profile automatically — no manual patch row is
+`llm-neuralwatt` plugin into the profile automatically, so no manual patch row is
 needed. To pass configuration, restate the row with a `config` block in your
 profile's `cordis.patch.yml`:
 
@@ -38,10 +38,10 @@ Configure under the plugin (`llm-neuralwatt`) in `cordis.patch.yml`:
 
 | Field | Default | Env fallback | Meaning |
 |---|---|---|---|
-| `route` | `neuralwatt` | — | Provider route key / selector id. |
-| `displayName` | `Neuralwatt` | — | Provider display name. |
+| `route` | `neuralwatt` | None | Provider route key / selector id. |
+| `displayName` | `Neuralwatt` | None | Provider display name. |
 | `baseURL` | `https://api.neuralwatt.com/v1` | `NEURALWATT_BASE_URL` | Endpoint root (overridable). |
-| `apiKeyEnv` | `NEURALWATT_API_KEY` | — | Env-var *name* holding the API key. |
+| `apiKeyEnv` | `NEURALWATT_API_KEY` | None | Env-var *name* holding the API key. |
 
 Precedence: `config` > env > built-in default. Set the API key by exporting
 `NEURALWATT_API_KEY` (or whatever `apiKeyEnv` names) or storing it via the credentials
@@ -49,7 +49,7 @@ service.
 
 ## Behavior
 
-- Models are fetched **once at load** (boot snapshot) from `GET {baseURL}/models`.
+- Models are fetched once at load (boot snapshot) from `GET {baseURL}/models`.
 - All models are exposed; only entries marked `deprecated` are skipped.
 - Vision models advertise `image` input; text-only models advertise `text`.
 - Reasoning efforts are mapped from Neuralwatt's `accepted_efforts`, folding
